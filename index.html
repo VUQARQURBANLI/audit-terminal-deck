@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO Audit Engine — Pitch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg-bar: #1c2128;
+      --green: #00ff88;
+      --green-dim: #00cc6a;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --red: #ff5f56;
+      --yellow: #ffbd2e;
+      --green-btn: #27c93f;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      background: #0d1117;
+      font-family: var(--font);
+      color: var(--green);
+      line-height: 1.6;
+      width: 100vw;
+    }
+
+    .terminal {
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .terminal__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-bar);
+      border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+      flex-shrink: 0;
+    }
+
+    .terminal__buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal__btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+    }
+
+    .terminal__btn--red   { background: var(--red); }
+    .terminal__btn--yellow { background: var(--yellow); }
+    .terminal__btn--green  { background: var(--green-btn); }
+
+    .terminal__title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      opacity: 0.4;
+    }
+
+    .overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+    }
+
+    .slides {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 1.5rem 2rem 2.5rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      position: relative;
+    }
+
+    .prompt {
+      color: var(--green-dim);
+      margin-bottom: 0.4rem;
+      font-size: clamp(0.9rem, 2vw, 0.95rem);
+    }
+
+    .slide h2 {
+      font-size: clamp(1.2rem, 3.5vw, 1.55rem);
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 1rem;
+      min-height: 2em;
+    }
+
+    .slide h2 .cursor {
+      display: inline-block;
+      width: 0.45em;
+      height: 1em;
+      background: var(--green);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .slide ul {
+      list-style: none;
+      margin: 0.75rem 0;
+    }
+
+    .slide li {
+      padding: 0.3rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: var(--text);
+      font-size: clamp(0.88rem, 2vw, 0.95rem);
+    }
+
+    .slide li::before {
+      content: '-';
+      position: absolute;
+      left: 0;
+      color: var(--green-dim);
+    }
+
+    .slide .tagline {
+      margin-top: 1.5rem;
+      color: var(--green);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+
+    .slide .tagline .prompt-arrow {
+      color: var(--green-dim);
+      margin-right: 0.5rem;
+    }
+
+    .slide .emphasis {
+      margin-top: 1rem;
+      padding: 0.75rem 0;
+      border-left: 3px solid var(--green);
+      padding-left: 1rem;
+      color: var(--text);
+      font-size: clamp(0.88rem, 2vw, 0.98rem);
+    }
+
+    .slide .emphasis strong {
+      color: var(--green);
+    }
+
+    /* Demo block — Slide 2 */
+    .demo {
+      margin-top: 1.25rem;
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      border-radius: 4px;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .demo-prompt {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: clamp(0.82rem, 2vw, 0.9rem);
+    }
+
+    .demo-prompt .pre {
+      color: var(--green-dim);
+      flex-shrink: 0;
+    }
+
+    .demo-input {
+      flex: 1;
+      min-width: 120px;
+      background: transparent;
+      border: none;
+      color: var(--green);
+      font-family: var(--font);
+      font-size: inherit;
+      outline: none;
+    }
+
+    .demo-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .demo-run {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--green);
+      border: 1px solid var(--green-dim);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 3px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .demo-run:hover {
+      background: rgba(0, 255, 136, 0.25);
+    }
+
+    .demo-logs {
+      font-size: clamp(0.78rem, 1.8vw, 0.86rem);
+      color: var(--text);
+      max-height: 180px;
+      overflow-y: auto;
+      line-height: 1.5;
+      margin-top: 0.5rem;
+    }
+
+    .demo-logs .line {
+      padding: 0.15rem 0;
+      color: var(--text-muted);
+    }
+
+    .demo-logs .line.ok { color: var(--green-dim); }
+    .demo-logs .line.warn { color: var(--yellow); }
+    .demo-logs .line.err { color: var(--red); }
+
+    .demo-progress {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--green-dim);
+      display: none;
+    }
+
+    .demo-progress.visible {
+      display: block;
+    }
+
+    .demo-progress-bar {
+      display: inline-block;
+      width: 120px;
+      height: 6px;
+      background: rgba(48, 54, 61, 0.8);
+      border-radius: 3px;
+      overflow: hidden;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    .demo-progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .demo-summary {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: rgba(0, 255, 136, 0.06);
+      border-left: 3px solid var(--green);
+      font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+      color: var(--text);
+      display: none;
+    }
+
+    .demo-summary.visible {
+      display: block;
+    }
+
+    .demo-summary .row {
+      padding: 0.2rem 0;
+    }
+
+    .demo-summary .export-links {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .demo-summary .export-links a,
+    .demo-summary .export-links button {
+      color: var(--green-dim);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .demo-summary .export-links a:hover,
+    .demo-summary .export-links button:hover {
+      color: var(--green);
+    }
+
+    .nav-hint {
+      position: fixed;
+      bottom: 0.6rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      opacity: 0.45;
+      z-index: 2;
+    }
+
+    @media (max-width: 640px) {
+      .slide {
+        padding: 1.25rem 1rem 2rem;
+      }
+
+      .slide h2 {
+        font-size: 1.1rem;
+      }
+
+      .demo-logs {
+        max-height: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="overlay" aria-hidden="true"></div>
+    <header class="terminal__bar">
+      <div class="terminal__buttons">
+        <button class="terminal__btn terminal__btn--red" aria-label="Close"></button>
+        <button class="terminal__btn terminal__btn--yellow" aria-label="Minimize"></button>
+        <button class="terminal__btn terminal__btn--green" aria-label="Maximize"></button>
+      </div>
+      <span class="terminal__title">user@audit — bash — 80×24</span>
+    </header>
+
+    <main class="slides">
+      <section class="slide active" data-slide="0">
+        <div class="prompt">user@audit:~$</div>
+        <h2><span class="typed"></span><span class="cursor"></span></h2>
+        <ul>
+          <li>Technical SEO audits are slow and manual</li>
+          <li>Issue lists lack prioritization</li>
+          <li>Teams don't know where problems live (nav/footer/content)</li>
+        </ul>
+        <p class="tagline"><span class="prompt-arrow">></span> We bring clarity in 30 seconds.</p>
+      </section>
+
+      <section class="slide" data-slide="1">
+        <div class="prompt">user@audit:~$</div>
+        <h2><span class="typed"></span><span class="cursor"></span></h2>
+        <ul>
+          <li>Enter URL → instant crawl</li>
+          <li>Live terminal log stream</li>
+          <li>Structured output (JSON/CSV)</li>
+          <li>Impact prioritization (HIGH/MED/LOW)</li>
+          <li>Location detection (nav/footer/header/content)</li>
+        </ul>
+        <div class="demo">
+          <div class="demo-prompt">
+            <span class="pre">user@audit:~$ audit</span>
+            <input type="text" class="demo-input" placeholder="https://example.com" value="" spellcheck="false" autocomplete="off">
+            <button type="button" class="demo-run">Run</button>
+          </div>
+          <div class="demo-logs" aria-live="polite"></div>
+          <div class="demo-progress" role="status">
+            <span class="demo-progress-bar"><span class="demo-progress-fill"></span></span>
+            <span class="demo-progress-pct">0%</span>
+          </div>
+          <div class="demo-summary">
+            <div class="row"><strong>Audit Summary</strong></div>
+            <div class="row">Issues: <span class="summary-total">0</span> total</div>
+            <div class="row">HIGH: <span class="summary-high">0</span>, MED: <span class="summary-med">0</span>, LOW: <span class="summary-low">0</span></div>
+            <div class="row">Top location: <span class="summary-location">—</span></div>
+            <div class="export-links">
+              <button type="button" class="export-json">Export JSON</button>
+              <button type="button" class="export-csv">Export CSV</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="2">
+        <div class="prompt">user@audit:~$</div>
+        <h2><span class="typed"></span><span class="cursor"></span></h2>
+        <ul>
+          <li>Free: 500 URLs partial audit</li>
+          <li>Pro: 5000+ URLs full impact report</li>
+          <li>API-first (FastAPI)</li>
+          <li>WebSocket live logs</li>
+          <li>Future AI add-on: Suggested Fixes</li>
+        </ul>
+        <p class="tagline"><span class="prompt-arrow">></span> Audit smarter. Fix faster.</p>
+      </section>
+    </main>
+  </div>
+
+  <p class="nav-hint" aria-hidden="true">← → navigate</p>
+
+  <script>
+    (function () {
+      const headlines = [
+        'Large websites don\'t know what to fix first.',
+        'Zero-Config Real-Time SEO Audit Engine',
+        'Built for SEO agencies and fast-growing startups'
+      ];
+
+      const slides = document.querySelectorAll('.slide');
+      const total = slides.length;
+      let current = 0;
+      const typeSpeed = 32;
+
+      function setSlide(index) {
+        if (index < 0 || index >= total) return;
+        slides[current].classList.remove('active');
+        current = index;
+        slides[current].classList.add('active');
+        typeHeadline(current);
+      }
+
+      function typeHeadline(slideIndex) {
+        const slide = slides[slideIndex];
+        const container = slide.querySelector('.typed');
+        const cursorEl = slide.querySelector('h2 .cursor');
+        const text = headlines[slideIndex];
+        if (!container || !text) return;
+
+        container.textContent = '';
+        if (cursorEl) cursorEl.style.visibility = 'hidden';
+
+        let i = 0;
+        function tick() {
+          if (i < text.length) {
+            container.textContent += text[i];
+            i++;
+            setTimeout(tick, typeSpeed);
+          } else {
+            if (cursorEl) cursorEl.style.visibility = 'visible';
+          }
+        }
+        tick();
+      }
+
+      function next() {
+        setSlide((current + 1) % total);
+      }
+
+      function prev() {
+        setSlide((current - 1 + total) % total);
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          next();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prev();
+        }
+      });
+
+      typeHeadline(0);
+
+      /* ——— Demo (Slide 2) ——— */
+      const demoLogs = [
+        { text: 'Resolving host…', cls: 'ok' },
+        { text: 'Fetching robots.txt…', cls: 'ok' },
+        { text: 'Loading sitemap.xml…', cls: 'ok' },
+        { text: 'Crawling / (200)…', cls: 'ok' },
+        { text: 'Crawling /pricing (200)…', cls: 'ok' },
+        { text: 'Found redirect chain…', cls: 'warn' },
+        { text: 'Found broken link (404)…', cls: 'err' },
+        { text: 'Deduplicating…', cls: 'ok' },
+        { text: 'Generating impact report…', cls: 'ok' }
+      ];
+
+      const slide2 = document.querySelector('.slide[data-slide="1"]');
+      const input = slide2.querySelector('.demo-input');
+      const runBtn = slide2.querySelector('.demo-run');
+      const logContainer = slide2.querySelector('.demo-logs');
+      const progressWrap = slide2.querySelector('.demo-progress');
+      const progressFill = slide2.querySelector('.demo-progress-fill');
+      const progressPct = slide2.querySelector('.demo-progress-pct');
+      const summaryBlock = slide2.querySelector('.demo-summary');
+
+      let demoInterval = null;
+
+      function resetDemo() {
+        if (demoInterval) clearInterval(demoInterval);
+        demoInterval = null;
+        logContainer.innerHTML = '';
+        progressWrap.classList.remove('visible');
+        progressFill.style.width = '0%';
+        progressPct.textContent = '0%';
+        summaryBlock.classList.remove('visible');
+      }
+
+      function runDemo() {
+        resetDemo();
+        const url = (input.value || '').trim() || 'https://example.com';
+        const runLine = document.createElement('div');
+        runLine.className = 'line ok';
+        runLine.textContent = 'user@audit:~$ audit ' + url;
+        logContainer.appendChild(runLine);
+
+        progressWrap.classList.add('visible');
+        let step = 0;
+        const totalSteps = demoLogs.length;
+        const interval = 420;
+
+        demoInterval = setInterval(function () {
+          if (step >= totalSteps) {
+            clearInterval(demoInterval);
+            demoInterval = null;
+            progressFill.style.width = '100%';
+            progressPct.textContent = '100%';
+
+            summaryBlock.querySelector('.summary-total').textContent = '12';
+            summaryBlock.querySelector('.summary-high').textContent = '2';
+            summaryBlock.querySelector('.summary-med').textContent = '5';
+            summaryBlock.querySelector('.summary-low').textContent = '5';
+            summaryBlock.querySelector('.summary-location').textContent = 'footer';
+            summaryBlock.classList.add('visible');
+            return;
+          }
+
+          const entry = demoLogs[step];
+          const line = document.createElement('div');
+          line.className = 'line ' + entry.cls;
+          line.textContent = entry.text;
+          logContainer.appendChild(line);
+          logContainer.scrollTop = logContainer.scrollHeight;
+
+          step++;
+          const pct = Math.round((step / totalSteps) * 100);
+          progressFill.style.width = pct + '%';
+          progressPct.textContent = pct + '%';
+        }, interval);
+      }
+
+      runBtn.addEventListener('click', runDemo);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') runDemo();
+      });
+
+      slide2.querySelector('.export-json').addEventListener('click', function () {
+        logContainer.appendChild(document.createElement('div')).textContent = '[Demo] JSON export triggered.';
+      });
+      slide2.querySelector('.export-csv').addEventListener('click', function () {
+        logContainer.appendChild(document.createElement('div')).textContent = '[Demo] CSV export triggered.';
+      });
+
+      window.pitchDeck = { next, prev, setSlide, current: function () { return current; } };
+    })();
+  </script>
+</body>
+</html>
+Add index.html
