@@ -203,12 +203,51 @@
 
     .qr-side {
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-card {
+      background: var(--bg-elevated);
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 255, 136, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .qr-card:hover {
+      border-color: rgba(0, 255, 136, 0.25);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 255, 136, 0.1);
+    }
+
+    .qr-card__label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .qr-card__img-wrap {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .qr-side img {
       display: block;
-      width: 180px;
-      height: 180px;
+      width: 160px;
+      height: 160px;
       object-fit: contain;
     }
 
@@ -230,6 +269,10 @@
 
       .qr-side {
         order: -1;
+      }
+
+      .qr-card {
+        padding: 1rem;
       }
 
       .qr-side img {
@@ -255,7 +298,12 @@
 <body>
   <div class="deck">
     <aside class="qr-side" aria-hidden="true">
-      <img src="https://res.cloudinary.com/dcw36vpkc/image/upload/v1771666029/qr-web-audit.okasoft.org-20260221_101820_236_hvwfqq.png" alt="QR code" width="180" height="180">
+      <div class="qr-card">
+        <span class="qr-card__label">Scan to try</span>
+        <div class="qr-card__img-wrap">
+          <img src="https://res.cloudinary.com/dcw36vpkc/image/upload/v1771666029/qr-web-audit.okasoft.org-20260221_101820_236_hvwfqq.png" alt="QR code" width="160" height="160">
+        </div>
+      </div>
     </aside>
   <div class="terminal">
     <header class="terminal__bar">
@@ -337,7 +385,12 @@ MED   /pricing footer (3 pages)</pre>
     </main>
   </div>
     <aside class="qr-side" aria-hidden="true">
-      <img src="https://res.cloudinary.com/dcw36vpkc/image/upload/v1771666029/qr-web-audit.okasoft.org-20260221_101820_236_hvwfqq.png" alt="QR code" width="180" height="180">
+      <div class="qr-card">
+        <span class="qr-card__label">Scan to try</span>
+        <div class="qr-card__img-wrap">
+          <img src="https://res.cloudinary.com/dcw36vpkc/image/upload/v1771666029/qr-web-audit.okasoft.org-20260221_101820_236_hvwfqq.png" alt="QR code" width="160" height="160">
+        </div>
+      </div>
     </aside>
   </div>
 
